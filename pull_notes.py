@@ -17,7 +17,7 @@ from win32_setctime import setctime
 
 from core import logging_conf
 from core.convert import YoudaoNoteConvert
-from core.public import covert_config,delete_folder
+from core.public import load_config,delete_folder
 from core.pull_images import PullImages
 from core.youDaoNoteApi import YoudaoNoteApi
 
@@ -47,25 +47,22 @@ class YoudaoNotePull(object):
         self.is_relative_path = None  # 是否使用相对路径
         self.ydnote_dir = ""          # 有道笔记目录
         self.ydnote_dir_list = []     # 有道笔记目录分割列表
+        self.config = ""
         self.load_config()
-    
+        
     
     def load_config(self):
-        config_dict, error_msg = covert_config()
-        if error_msg:
-            logging.error(error_msg)
-            sys.exit(1)
+        self.config = load_config()
         # 有道笔记目录
-        self.ydnote_dir: str = config_dict['ydnote_dir']
+        self.ydnote_dir: str = self.config.ydnote_dir
         if self.ydnote_dir:
             self.ydnote_dir_list = self.ydnote_dir.split('/')
         else:
             self.ydnote_dir_list = []
-        self.smms_secret_token = config_dict['smms_secret_token']
-        self.is_relative_path = config_dict['is_relative_path']
-        self.local_root_dir = config_dict['local_dir']
-        self.del_spare_file = config_dict['del_spare_file']
-        self.del_spare_dir = config_dict['del_spare_dir']
+        self.smms_secret_token = self.config.smms_secret_token
+        self.is_relative_path = self.config.is_relative_path
+        self.local_root_dir = self.config.local_dir
+        logging.info(f"笔记本地存储根路径：{self.local_root_dir}, 有道云笔记目录：{self.ydnote_dir}")
 
     def get_ydnote_dir_id(self):
         """
@@ -181,10 +178,10 @@ class YoudaoNotePull(object):
                 yb_dir_file_list.append(local_filename)
         
         # 删除本地多余的文件
-        if self.del_spare_file:
+        if self.config.del_spare_file:
             self.del_spare_local_file(local_dir, yb_dir_file_list)
         # 删除本地多余的目录
-        if self.del_spare_dir:
+        if self.config.del_spare_dir:
             self.del_spare_local_dir(local_dir, yb_dir_dir_list)
         
 

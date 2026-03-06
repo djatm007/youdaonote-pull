@@ -15,7 +15,7 @@ import requests
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(BASE_DIR)
-from core.public import covert_config
+from core.public import load_config
 from core.youDaoNoteApi import YoudaoNoteApi
 
 REGEX_IMAGE_URL = re.compile(r'!\[.*?\]\((.*?note\.youdao\.com.*?)\)')
@@ -302,9 +302,9 @@ class PullImages():
             return '', error_msg
 
     def load_config(self):
-        config_dict, error_msg = covert_config()
-        self.smms_secret_token = config_dict['smms_secret_token']
-        self.is_relative_path = config_dict['is_relative_path']
+        config = load_config()
+        self.smms_secret_token = config.smms_secret_token
+        self.is_relative_path = config.is_relative_path
 
     def more_pull_images(self, md_dir: str):
         """遍历文件夹的md文件,拉取md文件有道云的图片和附件

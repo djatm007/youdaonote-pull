@@ -55,66 +55,30 @@ uv pip install -r pyproject.toml
 pip install -r requirements.txt
 ```
 
-#### 3、设置登录 `Cookies` 文件 `cookies.json`
+#### 3、配置脚本参数
+
+复制一份.env.example文件，粘贴为.env文件，然后根据注释修改配置
+
+##### cookies配置
 
 由于有道云笔记登录升级，**目前脚本不能使用账号密码登录，只能使用 `Cookies` 登录。**
 
 获取 `Cookies` 方式：
 
 1. 在浏览器如 Chrome 中使用账号密码或者其他方式登录有道云笔记
-2. 打开 DevTools (F12)，Network 下找 `https://note.youdao.com/check-alive`请求，再找 `Cookie`
-3. 复制对应数据替换
-
-示例：
+2. 打开 DevTools (F12)，Network 下找 `https://note.youdao.com/check-alive`请求
+3. 再找 `Cookie`，复制对应数据进行替换
 
 ```
-{
-    "cookies": [
-        [
-            "YNOTE_CSTK",
-            "rR_Pejz0",
-            ".note.youdao.com",
-            "/"
-        ],
-        [
-            "YNOTE_LOGIN",
-            "3||1649054441155",
-            ".note.youdao.com",
-            "/"
-        ],
-        [
-            "YNOTE_SESS",
-            "v2|BdllbnwfaWl5RMUWOfqZ0gShf***6LqFRqB0MYfh4JLR",
-            ".note.youdao.com",
-            "/"
-        ]
-    ]
-}
+YNOTE_CSTK="WZ***fq"
+YNOTE_LOGIN="3||17***287006"
+YNOTE_SESS="v2|NV3u4L5dBVgyPLeLhHeu********uP4puRfeyRgKOMgu0HOW0lMhfwu0fkA06zhMzMhf6LRUm64QyhfkE0"
 ```
 
-#### 4、设置脚本参数配置文件 `config.json`
-
-建议使用 [Sublime](https://www.sublimetext.com/3) 等三方编辑器编辑 `config.json`，避免编码格式错误
-
-```json
-{
-    "local_dir": "",
-    "ydnote_dir": "",
-    "smms_secret_token": "",
-    "is_relative_path": true,
-    "del_spare_file": false,
-    "del_spare_dir": false
-}
-```
-
-* `local_dir`：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
-* `ydnote_dir`：选填，有道云笔记目录，默认会下载该所有的笔记，支持多层目录，例如：根目录/子目录/子子目录
-* `smms_secret_token`：选填， [SM.MS](https://sm.ms) 的 `Secret Token`（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 SM.MS 图床，不填则只下载到本地（`youdaonote-images` 文件夹），`Markdown` 中使用本地链接
-* `is_relative_path`：在 MD 文件中图片 / 附件是否采用相对路径展示，默认true
-* del_spare_file: 删除本地多余的文件，如果有道笔记上没有的文件，将会被删除
-* del_spare_dir：删除本地多余的目录，如果有道笔记上没有的目录，将会被删除
+##### 其他参数配置
 
 注意：del_spare_file和del_spare_dir这两个参数可以自动清理本地多余的文件或目录，这些文件或者目录是在有道云上被删除或者重命名的，如果手动清理还是比较麻烦的。如果仅仅是备份有道云的笔记，不会在本地添加额外的笔记，建议启用这两个参数。
+
 
 ### 运行导出脚本
 
@@ -127,7 +91,6 @@ python  pull_notes.py  # Windows
 建议笔记名称不要使用特殊符号，例如：#、/、:、空格、英文括号等，可以使用_和-符号替代，不然容易报错
 
 当进行多次导出时，根据有道云笔记文件最后修改时间是否大于本地文件最后修改时间来判断是否需要更新。再次导出时，只会导出有道云笔记上次导出后新增、修改或未导出的笔记，不会覆盖本地已经修改的文件。**但有道云笔记和本地不要同时修改同一个文件，这样可能会导致本地修改丢失**！更新时，会重新下载文件并覆盖原文件，图片也会重新下载。
-
 
 ## 代码调试
 

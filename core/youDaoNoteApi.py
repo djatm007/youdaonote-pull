@@ -1,5 +1,11 @@
+
+import os
+import sys
 import requests
-import json
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(BASE_DIR)
+from core.public import load_cookies
 
 
 class YoudaoNoteApi(object):
@@ -17,7 +23,7 @@ class YoudaoNoteApi(object):
                '_vendor=official-website&_launch=16&_firstTime=&_deviceId=0123456789abcdef&_platform=web&' \
                '_cityCode=110000&_cityName=&sev=j1&keyfrom=web&cstk={cstk}'
 
-    def __init__(self, cookies_path=None):
+    def __init__(self):
         """
         初始化
         :param cookies_path:
@@ -34,7 +40,6 @@ class YoudaoNoteApi(object):
             'sec-ch-ua-platform': '"macOS"',
         }
 
-        self.cookies_path = cookies_path if cookies_path else 'cookies.json'
         self.cstk = None
 
     def login_by_cookies(self) -> str:
@@ -42,31 +47,18 @@ class YoudaoNoteApi(object):
         使用 Cookies 登录，其实就是设置 Session 的 Cookies
         :return: error_msg
         """
-        try:
-            cookies = self._covert_cookies()
-        except Exception as err:
-            return format(err)
-        for cookie in cookies:
-            self.session.cookies.set(name=cookie[0], value=cookie[1], domain=cookie[2], path=cookie[3])
-        self.cstk = cookies[0][1] if cookies[0][0] == 'YNOTE_CSTK' else None  # cstk 用于请求时接口验证
+
+        config = load_cookies()
+        cookie_domain = 'note.youdao.com'
+        cookie_path = '/'
+        self.session.cookies.set(name='YNOTE_CSTK', value=config.ynote_cstk, domain=cookie_domain, path=cookie_path)
+        self.session.cookies.set(name='YNOTE_LOGIN', value=config.ynote_login, domain=cookie_domain, path=cookie_path)
+        self.session.cookies.set(name='YNOTE_SESS', value=config.ynote_sess, domain=cookie_domain, path=cookie_path)
+
+        self.cstk = config.ynote_cstk  # cstk 用于请求时接口验证
         if not self.cstk:
             return 'YNOTE_CSTK 字段为空'
         print('本次使用 Cookies 登录')
-
-    def _covert_cookies(self) -> list:
-        """
-        读取 cookies 文件的 cookies，并转换为字典
-        :return: cookies
-        """
-        with open(self.cookies_path, 'rb') as f:
-            json_str = f.read().decode('utf-8')
-
-        try:
-            cookies_dict = json.loads(json_str)  # 将字符串转换为字典
-            cookies = cookies_dict['cookies']
-        except Exception:
-            raise Exception('转换「{}」为字典时出现错误'.format(self.cookies_path))
-        return cookies
 
     def http_post(self, url, data=None, files=None):
         """
